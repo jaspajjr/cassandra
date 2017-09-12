@@ -46,7 +46,7 @@ def ts_fit_predict(model, X, y, train_index, test_index):
     return y_true, y_pred
 
 
-def utils(model, df):
+def cv_rmse(model, df):
     df_fit = df
     X = df_fit['ds'].values
     y = df_fit['y'].values
