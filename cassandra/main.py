@@ -1,5 +1,6 @@
 import pandas as pd
 from forecast import tsRegression
+from fbprophet import Prophet
 from utils import cv_rmse
 
 

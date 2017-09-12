@@ -43,10 +43,9 @@ class tsRegression(BaseEstimator, RegressorMixin):
         """
         X = df['ds'].values
         y = df['y'].values
-        print(self.changepoints)
 
-        model = Prophet(changepoints=self.changepoints,
-                        n_changepoints=self.n_changepoints)
+        model = Prophet(
+                        )
         self.df_fit = pd.DataFrame({'ds': X, 'y': y})
         model.fit(self.df_fit)
         self.model = model
