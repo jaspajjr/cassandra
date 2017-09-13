@@ -1,18 +1,18 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import TimeSeriesSplit
+from sklearn.model_selection import TimeSeriesSplit, _search
 from sklearn.metrics import mean_squared_error
 from fbprophet import Prophet
 from utils import plot_forecast
 
 
-def main(df):
+def fit_params(param_dict, df):
     X = df['ds']
     tscv = TimeSeriesSplit()
     train_score_list = []
     test_score_list = []
     for train_index, test_index in tscv.split(X):
-        m = Prophet(weekly_seasonality=True)
+        m = Prophet(**param_dict)
         df_train = pd.DataFrame(
                 {'ds': df.loc[train_index]['ds'],
                  'y': df.loc[train_index]['y']})
@@ -24,20 +24,34 @@ def main(df):
         y_train_pred = forecast.loc[train_index]['yhat']
         y_pred = forecast.loc[test_index]['yhat']
         y_true = df.loc[test_index]['y']
-        train_score = mean_squared_error(y_train_true, y_train_pred)
-        train_score_list.append(train_score)
-        test_score = mean_squared_error(y_true, y_pred)
-        test_score_list.append(test_score)
-    forecast.to_csv('forecast.csv', index=False)
-    print train_score_list
-    print test_score_list
-    plot_forecast(df_train, forecast)
-    return m, np.mean(test_score_list)
+        train_score_list.append(mean_squared_error(y_train_true, y_train_pred))
+        test_score_list.append(mean_squared_error(y_true, y_pred))
+        evaluation = {
+                'train_score': np.mean(train_score_list),
+                'test_score': np.mean(test_score_list)}
+    return evaluation
+
+
+def grid_search(df, param_dict):
+    optimum_score = np.inf
+    for param in _search.ParameterGrid(param_dict):
+        score = fit_params(param, df)
+        if score['test_score'] < optimum_score:
+            optimum_score = score['test_score']
+            best_params = param
+    if np.isinf(optimum_score):
+        raise
+    return {'score': optimum_score,
+            'params': best_params}
+
+
+def main(df):
+    param_dict = {'weekly_seasonality': [False, True]}
+    print(grid_search(df, param_dict))
 
 
 if __name__ == '__main__':
     file_loc = '~/working/github/cassandra/data/retail.csv'
     df = pd.read_csv(file_loc)
     df['y'] = np.log(df['y'])
-    score = main(df)
-    print score[1]
+    main(df)
