@@ -43,16 +43,15 @@ class tsRegression(BaseEstimator, RegressorMixin):
         """
         X = df['ds'].values
         y = df['y'].values
-        print(self.changepoints)
 
-        model = Prophet(changepoints=self.changepoints,
-                        n_changepoints=self.n_changepoints)
+        model = Prophet(
+                        )
         self.df_fit = pd.DataFrame({'ds': X, 'y': y})
         model.fit(self.df_fit)
         self.model = model
         return self
 
-    def predict(self, X):
+    def predict(self, X, N):
         """ A reference implementation of a predicting function.
 
         Parameters
@@ -65,7 +64,7 @@ class tsRegression(BaseEstimator, RegressorMixin):
         y : array of shape = [n_samples]
             The values predicted by fbProphet.
         """
-        periods = 31
+        periods = N
         future = self.model.make_future_dataframe(periods=periods)
         self.forecast = self.model.predict(future)
         return self.forecast['yhat']

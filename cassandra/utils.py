@@ -8,13 +8,16 @@ import sklearn.metrics as skm
 def plot_forecast(training_df, fcst, ax=None, uncertainty=True, plot_cap=True,
                   xlabel='ds', ylabel='y'):
     if ax is None:
-        fig = plt.figure(facecolor='w', figsize=(10, 6))
+        fig = plt.figure(facecolor='w', figsize=(14, 12))
         ax = fig.add_subplot(111)
     else:
         fig = ax.get_figure()
-    ax.plot_date(fcst['ds'], fcst['yhat'], ls='-', c='#0072B2')
-    ax.plot_date(training_df['ds'], training_df['y'], c='green')
+    ax.plot_date(fcst['ds'], fcst['yhat'], ls='-', ms=0, c='#0072B2')
+    ax.plot_date(training_df['ds'], training_df['y'], ms=0, c='green')
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=.5)
+    if uncertainty:
+        ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
+                        fcst['yhat_upper'], color='#0072B2', alpha=.3)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     fig.tight_layout()
@@ -37,7 +40,7 @@ def build_outcome_df(X, df_fit, forecast, test_index):
 
 def ts_fit_predict(model, X, y, train_index, test_index):
     df_fit = build_train_df(X, y, train_index, test_index)
-    model.fit(df_fit)
+    model.fit(df_fit, N)
     future = model.make_future_dataframe(periods=len(test_index))
     forecast = model.predict(future)
     outcome_df = build_outcome_df(X, df_fit, forecast, test_index)
