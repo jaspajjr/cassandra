@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit, _search
 from sklearn.metrics import mean_squared_error
 from fbprophet import Prophet
-from utils import plot_forecast
+from utils import fit_model, plot_forecast
 
 
 def fit_params(param_dict, df):
@@ -55,7 +55,9 @@ def main(df):
         'changepoint_prior_scale': [.01, .1, 1, 10, 100],
         'n_changepoints': [1, 5, 10, 25, 50]
         }
-    print(grid_search(df, param_dict))
+    result = grid_search(df, param_dict)
+    model = fit_model(df, result['params'])
+    plot_forecast(model)
 
 
 if __name__ == '__main__':
