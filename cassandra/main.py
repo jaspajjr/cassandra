@@ -3,7 +3,8 @@ import pandas as pd
 from sklearn.model_selection import TimeSeriesSplit, _search
 from sklearn.metrics import mean_squared_error
 from fbprophet import Prophet
-from utils import fit_model, plot_forecast
+from utils import plot_forecast
+from fitting import fit_model
 
 
 def fit_params(param_dict, df):
@@ -38,6 +39,7 @@ def grid_search(df, param_dict):
         try:
             score = fit_params(param, df)
         except RuntimeError:
+            score = {}
             score['test_score'] = np.inf
         if score['test_score'] < optimum_score:
             optimum_score = score['test_score']
@@ -51,17 +53,19 @@ def grid_search(df, param_dict):
 def main(df):
     param_dict = {
         'weekly_seasonality': [False, True],
-        'seasonality_prior_scale': [.01, .1, 1, 10, 100],
-        'changepoint_prior_scale': [.01, .1, 1, 10, 100],
+        # 'seasonality_prior_scale': [.01, .1, 1, 10, 100],
+        # 'changepoint_prior_scale': [.01, .1, 1, 10, 100],
         'n_changepoints': [1, 5, 10, 25, 50]
         }
     result = grid_search(df, param_dict)
-    model = fit_model(df, result['params'])
-    plot_forecast(model)
+    model = fit_model(df, result['params'], 31)
+    plot_forecast(df, model)
+    model.to_csv('~/working/github/cassandra/data/forecast.csv', index=False)
 
 
 if __name__ == '__main__':
-    file_loc = '~/working/github/cassandra/data/retail.csv'
+    # file_loc = '~/working/github/cassandra/data/retail.csv'
+    file_loc = '~/working/github/cassandra/data/searches.csv'
     df = pd.read_csv(file_loc)
     df['y'] = np.log(df['y'])
     main(df)

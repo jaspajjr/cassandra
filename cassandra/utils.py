@@ -13,7 +13,8 @@ def plot_forecast(training_df, fcst, ax=None, uncertainty=True, plot_cap=True,
     else:
         fig = ax.get_figure()
     ax.plot_date(fcst['ds'], fcst['yhat'], ls='-', ms=0, c='#0072B2')
-    ax.plot_date(training_df['ds'], training_df['y'], ms=0, c='green')
+    ax.plot_date(training_df['ds'], training_df['y'], ms=0, marker='.',
+                 c='green')
     ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=.5)
     if uncertainty:
         ax.fill_between(fcst['ds'].values, fcst['yhat_lower'],
